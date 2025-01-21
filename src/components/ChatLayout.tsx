@@ -34,7 +34,11 @@ interface Chat {
   messages: Message[];
 }
 
-const ChatLayout = () => {
+interface ChatLayoutProps {
+  isGuest: boolean;
+}
+
+const ChatLayout = ({ isGuest }: ChatLayoutProps) => {
   const navigate = useNavigate();
   const [chats, setChats] = useState<Chat[]>([
     {
@@ -49,8 +53,7 @@ const ChatLayout = () => {
   // Mock user data - in a real app, this would come from your auth context
   const user = {
     name: "John Doe",
-    isGuest: false,
-    hasCompletedProfile: true, // This should come from your auth context
+    isGuest,
   };
 
   const currentChat = chats.find((chat) => chat.id === currentChatId) || chats[0];
@@ -76,7 +79,7 @@ const ChatLayout = () => {
   };
 
   const createNewChat = () => {
-    const welcomeMessage = user.isGuest
+    const welcomeMessage = isGuest
       ? "How can I help you?"
       : `How can I help you today ${user.name}?`;
 
@@ -95,7 +98,6 @@ const ChatLayout = () => {
   };
 
   const handleLogout = () => {
-    // Implement logout logic here
     navigate("/");
   };
 
@@ -103,46 +105,42 @@ const ChatLayout = () => {
     navigate("/dashboard");
   };
 
-  // Redirect to dashboard if profile is incomplete
-  if (!user.hasCompletedProfile) {
-    navigate("/dashboard");
-    return null;
-  }
-
   return (
     <SidebarProvider>
       <div className="min-h-screen w-full flex bg-gradient-to-br from-indigo-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
-        <Sidebar>
-          <SidebarHeader className="p-4">
-            <Button
-              onClick={createNewChat}
-              className="w-full justify-start gap-2"
-              variant="outline"
-            >
-              <Plus className="h-4 w-4" />
-              New Chat
-            </Button>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {chats.map((chat) => (
-                    <SidebarMenuItem key={chat.id}>
-                      <SidebarMenuButton
-                        onClick={() => setCurrentChatId(chat.id)}
-                        className={currentChatId === chat.id ? "bg-accent" : ""}
-                      >
-                        <MessageSquare className="h-4 w-4" />
-                        <span>{chat.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-        </Sidebar>
+        {!isGuest && (
+          <Sidebar>
+            <SidebarHeader className="p-4">
+              <Button
+                onClick={createNewChat}
+                className="w-full justify-start gap-2"
+                variant="outline"
+              >
+                <Plus className="h-4 w-4" />
+                New Chat
+              </Button>
+            </SidebarHeader>
+            <SidebarContent>
+              <SidebarGroup>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {chats.map((chat) => (
+                      <SidebarMenuItem key={chat.id}>
+                        <SidebarMenuButton
+                          onClick={() => setCurrentChatId(chat.id)}
+                          className={currentChatId === chat.id ? "bg-accent" : ""}
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                          <span>{chat.title}</span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+          </Sidebar>
+        )}
 
         <div className="flex-1 container max-w-4xl h-screen py-8 px-4">
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg h-full flex flex-col">
@@ -157,27 +155,29 @@ const ChatLayout = () => {
                 >
                   {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                 </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full">
-                      <User className="h-5 w-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={goToDashboard}>
-                      Dashboard
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLogout}>
-                      Logout
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                {!isGuest && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="rounded-full">
+                        <User className="h-5 w-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={goToDashboard}>
+                        Dashboard
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleLogout}>
+                        Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {currentChat.messages.length === 0 && (
                 <div className="text-center text-gray-500 mt-8">
-                  {user.isGuest
+                  {isGuest
                     ? "How can I help you?"
                     : `How can I help you today ${user.name}?`}
                 </div>

@@ -5,7 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
-import Chat from "./pages/Chat";
+import AuthenticatedChat from "./pages/AuthenticatedChat";
+import GuestChat from "./pages/GuestChat";
 
 const queryClient = new QueryClient();
 
@@ -18,7 +19,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/chat" element={<Chat />} />
+          <Route path="/chat" element={<AuthenticatedChat />} />
+          <Route path="/guest-chat" element={<GuestChat />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
